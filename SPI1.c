@@ -1,0 +1,52 @@
+/*
+ * SPI1.c
+ *
+ *  Created on: Aug 15, 2019
+ *
+ */
+
+
+
+//includes
+#include "SPI1.h"
+
+//variables
+void (*volatile fun1)(void);
+
+void SPI1_init()
+{
+	RCC->AHB1ENR|=RCC_AHB1ENR_GPIOAEN;
+	RCC->APB2ENR|=RCC_APB2ENR_SPI1EN;
+	GPIOA->MODER=(GPIOA->MODER&(~(GPIO_MODER_MODER5|GPIO_MODER_MODER7|GPIO_MODER_MODER6)))|(GPIO_MODER_MODER5_1|GPIO_MODER_MODER7_1|GPIO_MODER_MODER6_1);
+	GPIOA->OTYPER&=~(GPIO_OTYPER_OT_5|GPIO_OTYPER_OT_7);
+	GPIOA->OTYPER|=GPIO_OTYPER_OT_6;
+	GPIOA->OSPEEDR|=(GPIO_OSPEEDER_OSPEEDR5|GPIO_OSPEEDER_OSPEEDR7|GPIO_OSPEEDER_OSPEEDR6);
+	GPIOA->PUPDR=(GPIOA->PUPDR&(~(GPIO_PUPDR_PUPDR5|GPIO_PUPDR_PUPDR7|GPIO_PUPDR_PUPDR6)))|(GPIO_PUPDR_PUPDR6_1);
+	GPIOA->AFR[0]=(GPIOA->AFR[0]&(~(((uint32_t)(0XF<<(5*4)))|((uint32_t)(0XF<<(6*4)))|((uint32_t)(0XF<<(7*4))))))|(((uint32_t)(5<<(5*4)))|((uint32_t)(5<<(6*4)))|((uint32_t)(5<<(7*4))));
+	SPI1->CR1|=SPI_CR1_BR_2|SPI_CR1_MSTR|SPI_CR1_BIDIMODE|SPI_CR1_BIDIOE|SPI_CR1_SSI|SPI_CR1_SSM;
+	SPI1->CR2=0x00000000;
+	SPI1->CR1|=SPI_CR1_SPE;
+	NVIC_SetPriority(SPI1_IRQn,NVIC_EncodePriority(NVIC_GetPriorityGrouping(),2,0));
+	NVIC_EnableIRQ(SPI1_IRQn);
+}
+
+void SPI1_TXBEmptyIntEnable(void (*interruptHandler)(void))
+{
+	fun1=interruptHandler;
+	SPI1->CR2|=SPI_CR2_TXEIE;
+}
+
+void SPI1_IRQHandler()
+{
+	fun1();
+}
+
+void SPI1_TXBEmptyIntDisable()
+{
+	SPI1->CR2&=~SPI_CR2_TXEIE;
+}
+
+void SPI1_TXBEmptyIntResume(void)
+{
+	SPI1->CR2|=SPI_CR2_TXEIE;
+}
