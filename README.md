@@ -15,5 +15,5 @@ The FSM runs with frequency 60HZ.
 The ADC conversion sampling rate is 120 sample per second.
 
 Find here steps and demo to my two weeks of spontanious fun journy of programming this simple system into a fun game.
-https://www.youtube.com/watch?v=byKGeltll4s&ab_channel=YoussefKamal
+https://youtu.be/X-oamANJmAk
 
